@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+import socket
+
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
+port = 80  #port
+address = (ip,port)
+client.connect(address) #establish connection
+
+#Get the website and store the session and token
+client.sendall("GET /accounts/login/?next=/fakebook/ HTTP/1.0\r\n"
+"Host: elsrv2.cs.umass.edu\r\n\r\n")
+info=""
+data = client.recv(4096)
+while data:
+    info = info+data
+    data = client.recv(4096)
+csrftoken = info[340:372]
+sessionidtoken = info[462 : 494]
+client.close()
+
+print info
