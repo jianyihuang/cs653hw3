@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import socket
-
+import random
+import struct
 #My own machine's IP
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
@@ -8,20 +9,102 @@ src_ip = s.getsockname()[0] #own machine IP
 s.close()
 
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+except socket.error , msg:
+    print 'Socket could not be created. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+    sys.exit()
+
+
 dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
-port = 80  #port
-address = (dest_ip,port)
-client.connect(address) #establish connection
+#IP headers
+ip_hd_vars = {"ihl" : 5,
+"version" :4,
+"typ_of_serv" : 0,
+"total_len" : 0,
+"ident" : int(random.random()*65535),
+"frag_off" : 0 ,
+"ttl" : 255,
+"protocol" : socket.IPPROTO_TCP,
+"checksum": 0,
+"srcaddr" : socket.inet_aton (src_ip),
+"destaddr" : socket.inet_aton (dest_ip)
+}
+ip_hd_vars["ihl_version"]=  (ip_hd_vars["ihl"] << 4) + ip_hd_vars["version"]
 
-#Get the website and store the session and token
-client.sendall("GET /accounts/login/?next=/fakebook/ HTTP/1.0\r\n"
-"Host: elsrv2.cs.umass.edu\r\n\r\n")
-info=""
-data = client.recv(4096)
-while data:
-    info = info+data
-    data = client.recv(4096)
-client.close()
-print info
+ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],
+ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],
+ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
 
+tcp_hd_vars = {
+"src_port" : 1234,
+"dest_port": 80,
+"seq_num" : 454,
+"ack_seq_num" : 0,
+"dat_off": 5,
+"urg": 0 ,
+"ack": 0,
+"psh": 0,
+"rst":0,
+"syn": 1,
+"fin" : 0,
+"window" : socket.htons(5840),
+"checksum" : 0,
+"urg_point": 0
+}
+tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
+tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1)
++ (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
+
+tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],
+tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],
+tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
+
+def checksum(msg):
+    s = 0
+
+    # loop taking 2 characters at a time
+    for i in range(0, len(msg), 2):
+        w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
+        s = s + w
+
+    s = (s>>16) + (s & 0xffff);
+    s = s + (s >> 16);
+
+    #complement and mask to 4 byte short
+    s = ~s & 0xffff
+
+    return s
+
+usr_data = ""
+
+#header fields
+src_addr = socket.inet_aton (src_ip)
+dest_addr = socket.inet_aton(dest_ip)
+placeholder = 0
+protocol = socket.IPPROTO_TCP
+tcp_length = len(tcp_header) + len(usr_data)
+
+temp = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length);
+temp = temp + tcp_header + usr_data;
+
+tcp_check = checksum(temp)
+#print tcp_checksum
+
+# make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
+tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],
+tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],
+tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],
+tcp_hd_vars["window"]) + struct.pack('H' , tcp_check) + struct.pack('!H' , tcp_hd_vars["urg_point"])
+
+# final full packet - syn packets dont have any data
+packet = ip_header + tcp_header + usr_data
+
+#Send the packet finally - the port specified has no effect
+s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target
+
+
+
+
+
+print "hello"
