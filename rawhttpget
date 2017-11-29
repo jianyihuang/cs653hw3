@@ -5,7 +5,7 @@ import struct
 #My own machine's IP
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
-src_ip = s.getsockname()[0] #own machine IP
+src_ip = 10.0.2.15 #own machine IP
 s.close()
 
 
@@ -16,7 +16,7 @@ except socket.error , msg:
     sys.exit()
 
 
-dest_ip = socket.gethostbyname("http://elsrv2.cs.umass.edu")   #host name
+dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
 #IP headers
 ip_hd_vars = {"ihl" : 5,
 "version" :4,
