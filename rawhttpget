@@ -16,7 +16,7 @@ except socket.error , msg:
     sys.exit()
 
 
-dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
+dest_ip = socket.gethostbyname("http://elsrv2.cs.umass.edu")   #host name
 #IP headers
 ip_hd_vars = {"ihl" : 5,
 "version" :4,
