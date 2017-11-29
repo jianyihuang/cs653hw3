@@ -32,9 +32,7 @@ ip_hd_vars = {"ihl" : 5,
 }
 ip_hd_vars["ihl_version"]=  (ip_hd_vars["ihl"] << 4) + ip_hd_vars["version"]
 
-ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],
-ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],
-ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
+ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
 
 tcp_hd_vars = {
 "src_port" : 1234,
@@ -53,12 +51,9 @@ tcp_hd_vars = {
 "urg_point": 0
 }
 tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
-tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1)
-+ (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
+tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
-tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],
-tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],
-tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
+tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
 
 def checksum(msg):
     s = 0
@@ -92,10 +87,7 @@ tcp_check = checksum(temp)
 #print tcp_checksum
 
 # make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
-tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],
-tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],
-tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],
-tcp_hd_vars["window"]) + struct.pack('H' , tcp_check) + struct.pack('!H' , tcp_hd_vars["urg_point"])
+tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],tcp_hd_vars["window"]) + struct.pack('H' , tcp_check) + struct.pack('!H' , tcp_hd_vars["urg_point"])
 
 # final full packet - syn packets dont have any data
 packet = ip_header + tcp_header + usr_data
