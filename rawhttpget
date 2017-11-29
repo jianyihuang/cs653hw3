@@ -71,7 +71,7 @@ def checksum(msg):
 
     return s
 
-usr_data = ""
+usr_data = "HELLO"
 
 #header fields
 src_addr = socket.inet_aton (src_ip)
