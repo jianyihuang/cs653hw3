@@ -5,9 +5,24 @@ import struct
 #My own machine's IP
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
-src_ip = s.getsockname()[0] #own machine IP
+src_ip = s.getsockname()[0]  #own machine IP
 s.close()
 
+def checksum(msg):
+    s = 0
+
+    # loop taking 2 characters at a time
+    for i in range(0, len(msg), 2):
+        w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
+        s = s + w
+
+    s = (s>>16) + (s & 0xffff);
+    s = s + (s >> 16);
+
+    #complement and mask to 4 byte short
+    s = ~s & 0xffff
+
+    return s
 
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
@@ -51,27 +66,13 @@ tcp_hd_vars = {
 "urg_point": 0
 }
 tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
-tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["rst"]<<2)+(tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
+tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
 tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
 
-def checksum(msg):
-    s = 0
 
-    # loop taking 2 characters at a time
-    for i in range(0, len(msg), 2):
-        w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
-        s = s + w
 
-    s = (s>>16) + (s & 0xffff);
-    s = s + (s >> 16);
-
-    #complement and mask to 4 byte short
-    s = ~s & 0xffff
-
-    return s
-
-usr_data = "HELLO"
+usr_data = "Hello "
 
 #header fields
 src_addr = socket.inet_aton (src_ip)
@@ -80,10 +81,13 @@ placeholder = 0
 protocol = socket.IPPROTO_TCP
 tcp_length = len(tcp_header) + len(usr_data)
 
-temp = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length);
-temp = temp + tcp_header + usr_data;
+psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
+print ip_header
+print tcp_header
+psh = psh + tcp_header + usr_data
+print len(psh)
 
-tcp_check = checksum(temp)
+tcp_check = checksum(psh)
 #print tcp_checksum
 
 # make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
@@ -93,7 +97,7 @@ tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest
 packet = ip_header + tcp_header + usr_data
 
 #Send the packet finally - the port specified has no effect
-s.sendto(packet, (dest_ip , 80 ))    # put this in a loop if you want to flood the target
+s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target
 
 
 
