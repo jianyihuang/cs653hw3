@@ -5,7 +5,7 @@ import struct
 #My own machine's IP
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
-src_ip = 10.0.2.15 #own machine IP
+src_ip = s.getsockname()[0] #own machine IP
 s.close()
 
 
@@ -51,7 +51,7 @@ tcp_hd_vars = {
 "urg_point": 0
 }
 tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
-tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
+tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["rst"]<<2)+(tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
 tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
 
@@ -93,7 +93,7 @@ tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest
 packet = ip_header + tcp_header + usr_data
 
 #Send the packet finally - the port specified has no effect
-s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target
+s.sendto(packet, (dest_ip , 80 ))    # put this in a loop if you want to flood the target
 
 
 
