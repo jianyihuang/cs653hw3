@@ -45,7 +45,7 @@ ip_hd_vars = {"ihl" : 5,
 "srcaddr" : socket.inet_aton (src_ip),
 "destaddr" : socket.inet_aton (dest_ip)
 }
-ip_hd_vars["ihl_version"]=  (ip_hd_vars["ihl"] << 4) + ip_hd_vars["version"]
+ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
 
 ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
 
@@ -72,7 +72,7 @@ tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["de
 
 
 
-usr_data = "Hello "
+usr_data = ""
 
 #header fields
 src_addr = socket.inet_aton (src_ip)
@@ -82,11 +82,10 @@ protocol = socket.IPPROTO_TCP
 tcp_length = len(tcp_header) + len(usr_data)
 
 psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
-print ip_header
-print tcp_header
+
 psh = psh + tcp_header + usr_data
 print len(psh)
-
+print src_ip
 tcp_check = checksum(psh)
 #print tcp_checksum
 
