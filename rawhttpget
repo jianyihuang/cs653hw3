@@ -10,10 +10,16 @@ s.close()
 
 def checksum(msg):
     s = 0
-
+    i = 0
+    size = len (msg)
     # loop taking 2 characters at a time
-    for i in range(0, len(msg), 2):
+    while size >= 2 :
         w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
+        s = s + w
+        i = i + 2
+        size = size - 2
+    if size == 1:
+        w = ord(msg[i])
         s = s + w
 
     s = (s>>16) + (s & 0xffff);
@@ -33,9 +39,6 @@ except socket.error , msg:
 
 
 dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
-
-
-
 #IP headers
 ip_hd_vars = {"ihl" : 5,
 "version" :4,
@@ -103,7 +106,6 @@ packet = ip_header + tcp_header + usr_data
 
 #Send the packet finally - the port specified has no effect
 s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target
-
 
 
 
