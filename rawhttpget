@@ -26,12 +26,16 @@ def checksum(msg):
 
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+    r = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
 except socket.error , msg:
     print 'Socket could not be created. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
 
 
 dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
+
+
+
 #IP headers
 ip_hd_vars = {"ihl" : 5,
 "version" :4,
@@ -48,6 +52,8 @@ ip_hd_vars = {"ihl" : 5,
 ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
 
 ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
+
+
 
 tcp_hd_vars = {
 "src_port" : 1234,
