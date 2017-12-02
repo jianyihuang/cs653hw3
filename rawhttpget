@@ -39,24 +39,7 @@ except socket.error , msg:
 
 
 dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
-#IP headers
-ip_hd_vars = {"ihl" : 5,
-"version" :4,
-"typ_of_serv" : 0,
-"total_len" : 0,
-"ident" : int(random.random()*65535),
-"frag_off" : 0 ,
-"ttl" : 255,
-"protocol" : socket.IPPROTO_TCP,
-"checksum": 0,
-"srcaddr" : socket.inet_aton (src_ip),
-"destaddr" : socket.inet_aton (dest_ip)
-}
-ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
-
-ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
-
-
+#TCP headers
 
 tcp_hd_vars = {
 "src_port" : 1234,
@@ -78,6 +61,27 @@ tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
 tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
 tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["dat_off"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
+
+
+#IP HEADER
+
+ip_hd_vars = {"ihl" : 5,
+"version" :4,
+"typ_of_serv" : 0,
+"total_len" : 0,
+"ident" : int(random.random()*65535),
+"frag_off" : 0 ,
+"ttl" : 255,
+"protocol" : socket.IPPROTO_TCP,
+"checksum": 0,
+"srcaddr" : socket.inet_aton (src_ip),
+"destaddr" : socket.inet_aton (dest_ip)
+}
+ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
+
+ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"] ,ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
+
+
 
 
 
@@ -102,7 +106,7 @@ tcp_check = checksum(psh)
 tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],tcp_hd_vars["window"]) + struct.pack('H' , tcp_check) + struct.pack('!H' , tcp_hd_vars["urg_point"])
 
 
-ip_hdr_vars["total_len"] = len(tcp_header + data)
+ip_hd_vars["total_len"] = len(tcp_header + usr_data)
 ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"],ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
 
 
