@@ -11,6 +11,7 @@ s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
 src_ip = s.getsockname()[0]  #own machine IP
 s.close()
+dest_ip = socket.gethostbyname(url.netloc)   #host name
 
 def checksum(msg):
     s = 0
@@ -43,7 +44,6 @@ except socket.error , msg:
     sys.exit()
 
 
-dest_ip = socket.gethostbyname(url.netloc)   #host name
 #TCP headers
 
 tcp_hd_vars = {
@@ -113,4 +113,14 @@ packet = ip_header + tcp_header + usr_data
 #Send the packet finally - the port specified has no effect
 s.sendto(packet, (dest_ip , 0 ))    # put this in a loop if you want to flood the target
 
-print recv_data
+# Include IP headers
+r.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+
+# receive all packages
+r.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
+
+# receive a package
+print r.recvfrom(65565)
+
+# disabled promiscuous mode
+r.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
