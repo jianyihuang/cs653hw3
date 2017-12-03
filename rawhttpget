@@ -125,12 +125,11 @@ def send_a_packet (flag, data):
 
     #Send the packet finally - the port specified has no effect
     s.sendto(packet, (dest_ip , 0 ))
-    return None
+    return
 #Packet sniffer in python for Linux
 #Sniffs only incoming TCP packet
 #create an INET, STREAMing socket
 # receive a packet
-send_a_packet("syn","")
 while True:
     packet = r.recvfrom(65565)
 
@@ -177,6 +176,7 @@ while True:
 
     print 'Data : ' + data
     #flag size 18 is a SYN ACK
+    send_a_packet("syn","")
     if (tcph_flag == 18):
         send_a_packet('ack',"")
         send_a_packet("hey",httpsend)
