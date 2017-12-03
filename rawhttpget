@@ -2,7 +2,11 @@
 import socket
 import random
 import struct
+import sys
+import urlparse
 #My own machine's IP
+url = urlparse.urlparse(sys.argv[1])
+
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(("8.8.8.8",80))
 src_ip = s.getsockname()[0]  #own machine IP
@@ -38,7 +42,7 @@ except socket.error , msg:
     sys.exit()
 
 
-dest_ip = socket.gethostbyname("elsrv2.cs.umass.edu")   #host name
+dest_ip = socket.gethostbyname(url.netloc)   #host name
 #TCP headers
 
 tcp_hd_vars = {
