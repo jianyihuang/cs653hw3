@@ -43,79 +43,92 @@ except socket.error , msg:
     sys.exit()
 
 
-#TCP headers
+    #TCP headers
+def send_a_packet (flag, data):
+    tcp_hd_vars = {
+    "src_port" : int(1024 + (random.random() * 49151)),
+    "dest_port": 80,
+    "seq_num" : int(random.random()*2000000),
+    "ack_seq_num" : 0,
+    "dat_off": 5,
+    "urg": 0 ,
+    "ack": 0,
+    "psh": 0,
+    "rst":0,
+    "syn": 0,
+    "fin" : 0,
+    "window" : socket.htons(65535),
+    "checksum" : 0,
+    "urg_point": 0
+    }
+    if (flag == "syn"):
+        tcp_hd_vars["syn"] = 1
+    if (flag == "urg"):
+        tcp_hd_vars["urg"] = 1
+    if (flag == "ack"):
+        tcp_hd_vars["ack"] = 1
+    if (flag == "rst"):
+        tcp_hd_vars["rst"] = 1
+    if (flag == "fin"):
+        tcp_hd_vars["fin"] = 1
+    if (flag == "psh"):
+        tcp_hd_vars["psh"] = 1
+    tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
+    tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
-tcp_hd_vars = {
-"src_port" : int(1024 + (random.random() * 49151)),
-"dest_port": 80,
-"seq_num" : int(random.random()*2000000),
-"ack_seq_num" : 0,
-"dat_off": 5,
-"urg": 0 ,
-"ack": 0,
-"psh": 0,
-"rst":0,
-"syn": 1,
-"fin" : 0,
-"window" : socket.htons(65535),
-"checksum" : 0,
-"urg_point": 0
-}
-tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
-tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
+    tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["offset_reserve"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
 
-tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["offset_reserve"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
+    usr_data = data
 
-usr_data = ""
+    #header fields
+    src_addr = socket.inet_aton (src_ip)
+    dest_addr = socket.inet_aton(dest_ip)
+    placeholder = 0
+    protocol = socket.IPPROTO_TCP
+    tcp_length = len(tcp_header) + len(usr_data)
 
-#header fields
-src_addr = socket.inet_aton (src_ip)
-dest_addr = socket.inet_aton(dest_ip)
-placeholder = 0
-protocol = socket.IPPROTO_TCP
-tcp_length = len(tcp_header) + len(usr_data)
+    psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
 
-psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
-
-psh = psh + tcp_header + usr_data
-print len(psh)
-print src_ip
-tcp_check = checksum(psh)
-#print tcp_checksum
-tcp_hd_vars["tcp_check"] = tcp_check
-# make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
-tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],tcp_hd_vars["window"]) + struct.pack('H' , tcp_hd_vars["tcp_check"]) + struct.pack('!H' , tcp_hd_vars["urg_point"])
-
-
-#IP HEADER
-
-ip_hd_vars = {"ihl" : 5,
-"version" :4,
-"typ_of_serv" : 0,
-"total_len" : 0,
-"ident" : int(random.random()*65535),
-"frag_off" : 0 ,
-"ttl" : 255,
-"protocol" : socket.IPPROTO_TCP,
-"checksum": 0,
-"srcaddr" : socket.inet_aton (src_ip),
-"destaddr" : socket.inet_aton (dest_ip)
-}
-ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
-ip_hd_vars["total_len"] = len(tcp_header + usr_data)
-ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"],ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
+    psh = psh + tcp_header + usr_data
+    print len(psh)
+    print src_ip
+    tcp_check = checksum(psh)
+    #print tcp_checksum
+    tcp_hd_vars["tcp_check"] = tcp_check
+    # make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
+    tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],tcp_hd_vars["window"]) + struct.pack('H' , tcp_hd_vars["tcp_check"]) + struct.pack('!H' , tcp_hd_vars["urg_point"])
 
 
-# final full packet - syn packets dont have any data
-packet = ip_header + tcp_header + usr_data
+    #IP HEADER
 
-#Send the packet finally - the port specified has no effect
-s.sendto(packet, (dest_ip , 0 ))
+    ip_hd_vars = {"ihl" : 5,
+    "version" :4,
+    "typ_of_serv" : 0,
+    "total_len" : 0,
+    "ident" : int(random.random()*65535),
+    "frag_off" : 0 ,
+    "ttl" : 255,
+    "protocol" : socket.IPPROTO_TCP,
+    "checksum": 0,
+    "srcaddr" : socket.inet_aton (src_ip),
+    "destaddr" : socket.inet_aton (dest_ip)
+    }
+    ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
+    ip_hd_vars["total_len"] = len(tcp_header + usr_data)
+    ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"],ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
+
+
+    # final full packet - syn packets dont have any data
+    packet = ip_header + tcp_header + usr_data
+
+    #Send the packet finally - the port specified has no effect
+    s.sendto(packet, (dest_ip , 0 ))
+    return None
 #Packet sniffer in python for Linux
 #Sniffs only incoming TCP packet
 #create an INET, STREAMing socket
 # receive a packet
-
+send_a_packet("syn","")
 while True:
     packet = r.recvfrom(65565)
 
@@ -162,73 +175,9 @@ while True:
 
     print 'Data : ' + data
     #flag size 18 is a SYN ACK
-    if (tcph_flag == 18):
-        #TCP headers
+    if (tcp_flag == 18):
+        send_a_packet('ack',"")
 
-        tcp_hd_vars = {
-        "src_port" : int(1024 + (random.random() * 49151)),
-        "dest_port": 80,
-        "seq_num" : int(random.random()*2000000),
-        "ack_seq_num" : 0,
-        "dat_off": 5,
-        "urg": 0 ,
-        "ack": 1,
-        "psh": 0,
-        "rst":0,
-        "syn": 0,
-        "fin" : 0,
-        "window" : socket.htons(65535),
-        "checksum" : 0,
-        "urg_point": 0
-        }
-        tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
-        tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
-
-        tcp_header = struct.pack('!HHLLBBHHH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"], tcp_hd_vars["offset_reserve"],tcp_hd_vars["flags"],  tcp_hd_vars["window"], tcp_hd_vars["checksum"], tcp_hd_vars["urg_point"])
-
-        usr_data = ""
-
-        #header fields
-        src_addr = socket.inet_aton (src_ip)
-        dest_addr = socket.inet_aton(dest_ip)
-        placeholder = 0
-        protocol = socket.IPPROTO_TCP
-        tcp_length = len(tcp_header) + len(usr_data)
-
-        psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
-
-        psh = psh + tcp_header + usr_data
-        tcp_check = checksum(psh)
-        #print tcp_checksum
-        tcp_hd_vars["tcp_check"] = tcp_check
-        # make the tcp header again and fill the correct checksum - remember checksum is NOT in network byte order
-        tcp_header = struct.pack('!HHLLBBH' , tcp_hd_vars["src_port"], tcp_hd_vars["dest_port"],tcp_hd_vars["seq_num"], tcp_hd_vars["ack_seq_num"],tcp_hd_vars ["offset_reserve"], tcp_hd_vars["flags"],tcp_hd_vars["window"]) + struct.pack('H' , tcp_hd_vars["tcp_check"]) + struct.pack('!H' , tcp_hd_vars["urg_point"])
-
-
-        #IP HEADER
-
-        ip_hd_vars = {"ihl" : 5,
-        "version" :4,
-        "typ_of_serv" : 0,
-        "total_len" : 0,
-        "ident" : int(random.random()*65535),
-        "frag_off" : 0 ,
-        "ttl" : 255,
-        "protocol" : socket.IPPROTO_TCP,
-        "checksum": 0,
-        "srcaddr" : socket.inet_aton (src_ip),
-        "destaddr" : socket.inet_aton (dest_ip)
-        }
-        ip_hd_vars["ihl_version"]=  (ip_hd_vars["version"] << 4) + ip_hd_vars["ihl"]
-        ip_hd_vars["total_len"] = len(tcp_header + usr_data)
-        ip_header = struct.pack('!BBHHHBBH4s4s' , ip_hd_vars["ihl_version"],ip_hd_vars["typ_of_serv"], ip_hd_vars["total_len"], ip_hd_vars["ident"],ip_hd_vars["frag_off"], ip_hd_vars["ttl"], ip_hd_vars["protocol"],ip_hd_vars["checksum"],ip_hd_vars["srcaddr"], ip_hd_vars["destaddr"])
-
-
-        # final full packet - syn packets dont have any data
-        packet = ip_header + tcp_header + usr_data
-        print (packet)
-        #Send the packet finally - the port specified has no effect
-        s.sendto(packet, (dest_ip , 0 ))
 
 
     print
