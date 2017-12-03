@@ -12,7 +12,7 @@ s.connect(("8.8.8.8",80))
 src_ip = s.getsockname()[0]  #own machine IP
 s.close()
 dest_ip = socket.gethostbyname(url.netloc)   #host name
-httpsend = "GET / HTTP/1.0\r\n\r\n"
+httpsend = "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" % (url.path,url.netloc)
 
 
 def checksum(msg):
@@ -177,7 +177,7 @@ while True:
 
     print 'Data : ' + data
     #flag size 18 is a SYN ACK
-    
+
     if (tcph_flag == 18):
         send_a_packet('ack',"")
         send_a_packet("hey",httpsend)
