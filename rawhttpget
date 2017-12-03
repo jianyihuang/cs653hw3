@@ -49,9 +49,9 @@ except socket.error , msg:
     #TCP headers
 def send_a_packet (flag, data, acknum):
     tcp_hd_vars = {
-    "src_port" : source_port_random,
+    "src_port" : int(1024 + (random.random() * 49151)),
     "dest_port": 80,
-    "seq_num" : sequence_random + 1,
+    "seq_num" : sequence_random,
     "ack_seq_num" : acknum,
     "dat_off": 5,
     "urg": 0 ,
