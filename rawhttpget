@@ -46,12 +46,12 @@ except socket.error , msg:
 
 
     #TCP headers
-def send_a_packet (flag, data):
+def send_a_packet (flag, data, acknum):
     tcp_hd_vars = {
     "src_port" : int(1024 + (random.random() * 49151)),
     "dest_port": 80,
     "seq_num" : int(random.random()*2000000),
-    "ack_seq_num" : 0,
+    "ack_seq_num" : acknum,
     "dat_off": 5,
     "urg": 0 ,
     "ack": 0,
@@ -130,7 +130,10 @@ def send_a_packet (flag, data):
 #Sniffs only incoming TCP packet
 #create an INET, STREAMing socket
 # receive a packet
-send_a_packet("syn","")
+
+#disgard packets that is not from the destination IP, TCP header, check the port.
+
+send_a_packet("syn","",0)
 while True:
     packet = r.recvfrom(65565)
 
@@ -179,8 +182,8 @@ while True:
     #flag size 18 is a SYN ACK
 
     if (tcph_flag == 18):
-        send_a_packet('ack',"")
-        send_a_packet("hey",httpsend)
+        send_a_packet('ack',"",sequence + 1)
+        send_a_packet("",httpsend,sequence+1)
 
 
     print
