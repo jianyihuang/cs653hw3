@@ -179,7 +179,7 @@ while True:
     #flag size 18 is a SYN ACK
     if (tcph_flag == 18):
         send_a_packet('ack',"")
-        send_a_packet(httpsend)
+        send_a_packet("hey",httpsend)
 
 
     print
