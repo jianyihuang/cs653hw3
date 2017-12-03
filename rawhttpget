@@ -175,7 +175,7 @@ while True:
 
     print 'Data : ' + data
     #flag size 18 is a SYN ACK
-    if (tcp_flag == 18):
+    if (tcph_flag == 18):
         send_a_packet('ack',"")
 
 
