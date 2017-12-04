@@ -154,17 +154,12 @@ while (time.time()-start) < fin:
 
     iph_length = ihl * 4
 
-    ttl = iph[5]
-    protocol = iph[6]
-    src_addr = socket.inet_ntoa(iph[8]);
-    dest_addr = socket.inet_ntoa(iph[9]);
-
     #print 'Version : ' + str(version) + ' IP Header Length : ' + str(ihl) + ' TTL : ' + str(ttl) + ' Protocol : ' + str(protocol) + ' Source Address : ' + str(s_addr) + ' Destination Address : ' + str(d_addr)
 
     tcp_header = packet[iph_length:iph_length+20]
 
     #now unpack them :)
-    tcph = struct.unpack('!HHLLBBHHH' , tcp_header)
+    tcpheader = struct.unpack('!HHLLBBHHH' , tcp_header)
     sequence = tcph[2]
     tcph_length = doff_reserved >> 4
     tcph_flag = tcph[5]
