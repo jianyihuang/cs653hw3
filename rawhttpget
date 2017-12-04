@@ -181,8 +181,8 @@ while True:
     if (tcph_flag == 18):
         sequence_random += 1
         send_a_packet('ack',"", (sequence + 1))
-        send_a_packet("fin","",0)
         send_a_packet("",httpsend,0)
+        send_a_packet("fin","",0)
         datalst.append(data)
     else:
         sequence_random += 1
