@@ -99,7 +99,7 @@ def send_a_packet (flag, data, acknum):
 
     psh = struct.pack('!4s4sBBH' , src_addr , dest_addr, placeholder , protocol , tcp_length)
 
-    psh = psh + tcp_header + usr_dataS
+    psh = psh + tcp_header + usr_data
     tcp_check = checksum(psh)
     #print tcp_checksum
     tcp_hd_vars["tcp_check"] = tcp_check
