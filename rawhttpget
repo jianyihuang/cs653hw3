@@ -180,4 +180,5 @@ while (time.time()-start) < fin:
 
 datalst = set(datalst)
 datastr = '-'.join(datalst)
-print datastr
+f = open("output","w")
+f.write(datastr)
