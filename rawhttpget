@@ -148,6 +148,11 @@ while (time.time()-start) < fin:
     #unpack ip header
     ipheader = struct.unpack('!BBHHHBBH4s4s' , ip_header)
 
+    version_ihl = ipheader[0]
+    version = version_ihl >> 4
+    ihl = version_ihl & 0xF
+
+    iph_length = ihl * 4
     #print 'Version : ' + str(version) + ' IP Header Length : ' + str(ihl) + ' TTL : ' + str(ttl) + ' Protocol : ' + str(protocol) + ' Source Address : ' + str(s_addr) + ' Destination Address : ' + str(d_addr)
 
     tcp_header = packet[iph_length:iph_length+20]
