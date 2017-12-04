@@ -196,5 +196,5 @@ while (time.time()-start) < fin:
 
 datalst = sorted(set(datalst))
 
-for i,_ in datalst:
-    print i
+(x,y) for x in datalst:
+    print x
