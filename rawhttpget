@@ -76,6 +76,9 @@ def send_a_packet (flag, data, acknum):
         tcp_hd_vars["fin"] = 1
     if (flag == "psh"):
         tcp_hd_vars["psh"] = 1
+    if (flag == "finack"):
+        tcp_hd_var["fin"] = 1
+        tcp_hd_var["ack"] = 1
     tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
     tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
@@ -182,7 +185,7 @@ while True:
         sequence_random += 1
         send_a_packet('ack',"", (sequence + 1))
         send_a_packet("",httpsend,0)
-        send_a_packet("fin","",(len(data) + sequence + 1))
+        send_a_packet("finack","",(len(data) + sequence + 1))
         datalst.append(data)
     else:
         sequence_random += 1
