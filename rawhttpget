@@ -178,6 +178,6 @@ while (time.time()-start) < fin:
         send_a_packet('ack',"",(sequence + 1))
         datalst.append(data)
 
-datalst = list(set(datalst))
+datalst = set(datalst)
 for x in datalst:
     print x
