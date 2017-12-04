@@ -153,11 +153,8 @@ while (time.time()-start) < fin:
     ihl = version_ihl & 0xF
 
     iph_length = ihl * 4
-    #print 'Version : ' + str(version) + ' IP Header Length : ' + str(ihl) + ' TTL : ' + str(ttl) + ' Protocol : ' + str(protocol) + ' Source Address : ' + str(s_addr) + ' Destination Address : ' + str(d_addr)
 
     tcp_header = packet[iph_length:iph_length+20]
-
-    #now unpack them :)
     tcpheader = struct.unpack('!HHLLBBHHH' , tcp_header)
     sequence = tcpheader[2]
     doff_reserved = tcpheader[4]
@@ -168,7 +165,6 @@ while (time.time()-start) < fin:
     #get data from the packet
     data = packet[header_size:]
 
-    #print 'Data : ' + data
     #flag size 18 is a SYN ACK
 
     if (tcph_flag == 18):
@@ -181,8 +177,6 @@ while (time.time()-start) < fin:
         sequence_random += 1
         send_a_packet('ack',"",(sequence + 1))
         datalst.append(data)
-
-datalst = sorted(set(datalst))
 
 for x in datalst:
     print x
