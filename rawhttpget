@@ -30,6 +30,7 @@ def checksum(msg):
         s = s + w
         i = i + 2
         size = size - 2
+    #if one then just ord() that
     if size == 1:
         w = ord(msg[i])
         s = s + w
@@ -43,8 +44,8 @@ def checksum(msg):
     return s
 
 try:
-    s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
-    r = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
+    s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW) #new socket
+    r = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP) #new receving socket
 except socket.error , msg:
     print 'Socket could not be created. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
