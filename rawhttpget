@@ -4,7 +4,11 @@ import random
 import struct
 import sys
 import urlparse
+import time
 #My own machine's IP
+fin = 5
+start = time.time()
+
 url = urlparse.urlparse(sys.argv[1])
 
 s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -134,7 +138,7 @@ def send_a_packet (flag, data, acknum):
 #disgard packets that is not from the destination IP, TCP header, check the port.
 
 send_a_packet("syn","",0)
-while True:
+while (time.time()-start) < fin:
     packet = r.recvfrom(65565)
 
     #packet string from tuple
