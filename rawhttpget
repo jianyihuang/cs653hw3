@@ -77,8 +77,8 @@ def send_a_packet (flag, data, acknum):
     if (flag == "psh"):
         tcp_hd_vars["psh"] = 1
     if (flag == "finack"):
-        tcp_hd_var["fin"] = 1
-        tcp_hd_var["ack"] = 1
+        tcp_hd_vars["fin"] = 1
+        tcp_hd_vars["ack"] = 1
     tcp_hd_vars ["offset_reserve"] = (tcp_hd_vars ["dat_off"] << 4) + 0
     tcp_hd_vars["flags"] = tcp_hd_vars["fin"] + (tcp_hd_vars["syn"]<<1) + (tcp_hd_vars["rst"]<<2) + (tcp_hd_vars["psh"] << 3) + (tcp_hd_vars["ack"] << 4) + (tcp_hd_vars["urg"]<<5)
 
