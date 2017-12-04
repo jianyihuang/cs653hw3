@@ -179,5 +179,5 @@ while (time.time()-start) < fin:
         datalst.append(data)
 
 datalst = set(datalst)
-for x in datalst:
-    print x
+datastr = '-'.join(datalst)
+print datastr
