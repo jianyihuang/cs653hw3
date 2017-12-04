@@ -160,6 +160,7 @@ while (time.time()-start) < fin:
     #now unpack them :)
     tcpheader = struct.unpack('!HHLLBBHHH' , tcp_header)
     sequence = tcpheader[2]
+    doff_reserved = tcpheader[4]
     tcph_length = doff_reserved >> 4
     tcph_flag = tcpheader[5]
     header_size = iph_length + tcph_length * 4
